@@ -16,24 +16,33 @@ genuinely rotating circuits on demand using Tor's own control protocol.
 Supporting scripts:
 - `check_ip.py` — shared utility: checks the current exit IP/country through the Tor SOCKS proxy (used by all three modes above)
 - `check_tor_network.py` — inspects and prints the currently active Tor circuit without launching a new Tor process (useful if Tor's already running)
+- `setup_tor.py` — one-time setup script that fetches Tor itself (see Setup below)
 
 ## Tech stack
 
 - Python 3.x
 - [`stem`](https://stem.torproject.org/) — Python controller library for Tor, used to launch Tor, authenticate to its control port, and send control signals like `NEWNYM`
 - `requests` — SOCKS-proxied HTTP requests
-- Tor itself (bundled as `tor.exe` locally — **not tracked in this repo**, see Setup below)
+- Tor itself — fetched on demand by `setup_tor.py` directly from the official Tor Project (**not committed to this repo** — see Setup below for why)
 
 ## Setup
 
 **This project is currently Windows-only** (paths are hardcoded with Windows-style separators).
 
-1. Download the Tor Expert Bundle for Windows from the [official Tor Project downloads page](https://www.torproject.org/download/tor/)
-2. Extract it so that `tor.exe` sits at `tor/tor.exe` relative to this project's root
-3. Install Python dependencies:
-```bash
+1. Install Python dependencies:
+   ```bash
    pip install stem requests
-```
+   ```
+2. Run the setup script to fetch Tor automatically:
+   ```bash
+   python setup_tor.py
+   ```
+   This downloads the current official Tor Expert Bundle directly from
+   torproject.org and extracts it to `tor/tor.exe`. Fetching it this way
+   (rather than committing the binary to the repo) means you always get
+   an official, current, verifiable copy straight from the source — if
+   the automatic download ever fails, the script prints a link to the
+   official download page so you can grab it manually instead.
 
 ## Running each mode
 
@@ -63,6 +72,7 @@ Things I'd improve with more time:
 
 - Windows-only currently (hardcoded `tor.exe` path with backslashes)
 - The Intermediate mode's country selection (`EntryNodes: '{FR}'`, `ExitNodes: '{ES}'`) is hardcoded in the script rather than configurable at runtime
+- `setup_tor.py` relies on scraping the official Tor download page for the current bundle link — if Tor Project ever restructures that page, the script falls back to printing manual download instructions rather than failing silently
 
 ## Full write-up
 
