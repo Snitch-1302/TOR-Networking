@@ -1,12 +1,11 @@
-
 from stem.control import Controller
 from stem import CircStatus
-import requests
-import json
-from datetime import datetime
 
-with Controller.from_port(port = 9051) as controller:
-    controller.authenticate()
+from check_ip import check_current_ip
+
+
+def print_current_circuit(controller):
+    """Prints the relays (entry -> middle -> exit) in the currently active circuit."""
     for circ in sorted(controller.get_circuits()):
         print(circ.status)
         if circ.status == CircStatus.BUILT:
@@ -18,11 +17,9 @@ with Controller.from_port(port = 9051) as controller:
                 address = desc.address if desc else 'unknown'
                 print(" %s- %s (%s, %s)" % (div, fingerprint, nickname, address))
 
-PROXIES = {
-    'http': 'socks5://127.0.0.1:9050',
-    'https': 'socks5://127.0.0.1:9050'
-}
-response = requests.get("http://ip-api.com/json/", proxies=PROXIES)
-result = json.loads(response.content)
-print('TOR IP [%s]: %s %s'%(datetime.now().strftime("%d-%m-%Y %H:%M:%S"), result["query"], result["country"]))
 
+if __name__ == "__main__":
+    with Controller.from_port(port=9051) as controller:
+        controller.authenticate()
+        print_current_circuit(controller)
+        check_current_ip()
